@@ -19,4 +19,4 @@ sudo apt install apng2gif
   Save the txt file.  
   Open terminal in this folder.  
   Run command: python3 linkgen.py  
-After the process completes, there will be two folders "_animated" and "_static" with respective content.
+After the process completes, there will be two folders <i>"_animated"</i> and <i>"_static"</i> with respective content.
