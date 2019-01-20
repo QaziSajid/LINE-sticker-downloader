@@ -15,21 +15,33 @@ def dwnl(pkid, mode):
         if len(sys.argv) > 2:
             pack_ext = sys.argv[2]
     else:'''
+    if not pkid.isdigit():
+        print("Invalid sticker code ")
+        print('...Skipped...\n')
+        return
     pack_id = int(pkid)
-    pack_meta = get_pack_meta(pack_id).text
-
+    pack_m = get_pack_meta(pack_id)
+    
+    if (pack_m == None):
+        print("Could not find any stickers for code ", pkid)
+        print('...Skipped...\n')
+        return
+    
+    pack_meta = pack_m.text
     name_string = """"en":"""  # folder name will take pack's English title
     pack_name = get_pack_name(name_string, pack_meta)
     pack_name = decode_escapes(pack_name)
     pack_name = pack_name.strip() # To remove empty sides spaces # Example Bug:  Sticker ID= 9721  Name= UNIVERSTAR BT21: Cuteness Overloaded!
     if mode==0:
-        print("\nThis pack contains stickers for", pack_name)
+        print("This pack contains stickers for", pack_name)
 
     #if pack_ext == "":
     if mode==1 and """"hasAnimation":true""" not in pack_meta:
+        print("Could not find any animated stickers for ", pack_name)
+        print('...Skipped...\n')
         return
     elif mode==1:
-        print("\nThis pack contains animated stickers for", pack_name)
+        print("This pack contains animated stickers for ", pack_name)
         #    pack_ext = input("\nAnimated stickers available! \nEnter png, apng, or both, anything else to exit: ")
         #else:
             #pack_ext = input("\nOnly static stickers available! \ny to download, anything else to exit: ")
@@ -60,6 +72,7 @@ def dwnl(pkid, mode):
     #print("\nDone! Program exiting...")
 
     #sys.exit()
+    print('...Done...\n')
     return
 
 def get_pack_name(name_string, pack_meta):
@@ -79,15 +92,16 @@ def get_ids(id_string, pack_meta):
 def validate_savepath(pack_name):
     decoded_name = decode_escapes(pack_name)
     save_name = "".join(i for i in decoded_name if i not in r'\/:*?"<>|')
-    os.makedirs(str(save_name), exist_ok = True)  # exist_ok = True doesn't raise exception if directory exists. Files already in directory are not erased
+    #os.makedirs(str(save_name), exist_ok = True)  # exist_ok = True doesn't raise exception if directory exists. Files already in directory are not erased
     return save_name
 
 
 def get_gif(pack_id, list_ids, pack_name):
     pack_name = validate_savepath(pack_name)
+    os.makedirs('_animated/'+str(pack_name), exist_ok = True)
     for x in list_ids:
         # save_path = os.path.join(str(pack_name), str(x) + '.gif')
-        save_path = os.path.join(str(pack_name), str(x) + '.apng')
+        save_path = os.path.join('_animated/', str(pack_name), str(x) + '.apng')
         # url = 'http://lstk.ddns.net/animg/{}.gif'.format(x)
         url = 'https://sdl-stickershop.line.naver.jp/products/0/0/1/{}/iphone/animation/{}@2x.png'.format(pack_id, x)
         image = requests.get(url, stream = True)
@@ -99,8 +113,9 @@ def get_gif(pack_id, list_ids, pack_name):
 
 def get_png(pack_id, list_ids, pack_name):
     pack_name = validate_savepath(pack_name)
+    os.makedirs('_static/'+str(pack_name), exist_ok = True)
     for x in list_ids:
-        save_path = os.path.join(str(pack_name), str(x) + '.png')
+        save_path = os.path.join('_static/', str(pack_name), str(x) + '.png')
         url = 'http://dl.stickershop.line.naver.jp/stickershop/v1/sticker/{}/iphone/sticker@2x.png'.format(x)
         image = requests.get(url, stream = True)
         with open(save_path, 'wb') as f:  # http://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py Understood! with construct is a fancy way of try/catch that cleans up, even with exceptions thrown
@@ -120,7 +135,6 @@ def get_pack_meta(pack_id):
     if pack_meta.status_code == 200:
         return pack_meta
     else:
-        print("{} did not return 200 status code, possibly invalid sticker ID. Program exiting...".format(pack_id))
         return#sys.exit()
 
 unicode_sanitizer = re.compile(r'''  # compile pattern into object, use with match()
