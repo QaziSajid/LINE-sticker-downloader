@@ -8,8 +8,9 @@ Mail me in case of any issues.
 
 <b> Prerequisites</b>: python3, apng2gif
 
-sudo apt install python3  
-sudo apt install apng2gif  
+``sudo apt install python3``  
+
+``sudo apt install apng2gif``  
 
 <b>How to use:</b>  
   Download this repository.  
