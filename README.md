@@ -12,6 +12,10 @@ Mail me in case of any issues.
 
 ``sudo apt install apng2gif``  
 
+For using progressbar, use with-progressbar branch, and install ``progress`` module using ``pip`` or ``pip3``
+
+``pip install progress``
+
 <b>How to use:</b>  
   Download this repository.  
   Extract the zip file.  
