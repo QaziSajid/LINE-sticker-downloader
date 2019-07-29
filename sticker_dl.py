@@ -6,15 +6,10 @@ import sys
 import os
 import re
 import codecs
-
+from progress.bar import IncrementalBar as Bar
 
 def dwnl(pkid, mode):
     pack_ext = ""
-    '''if len(sys.argv) > 1:
-        pack_id = int(sys.argv[1])
-        if len(sys.argv) > 2:
-            pack_ext = sys.argv[2]
-    else:'''
     if not pkid.isdigit():
         print("Invalid sticker code ")
         print('...Skipped...\n')
@@ -42,10 +37,7 @@ def dwnl(pkid, mode):
         return
     elif mode==1:
         print("This pack contains animated stickers for ", pack_name)
-        #    pack_ext = input("\nAnimated stickers available! \nEnter png, apng, or both, anything else to exit: ")
-        #else:
-            #pack_ext = input("\nOnly static stickers available! \ny to download, anything else to exit: ")
-
+        
     id_string = """"id":"""
     list_ids = []
 
@@ -72,7 +64,7 @@ def dwnl(pkid, mode):
     #print("\nDone! Program exiting...")
 
     #sys.exit()
-    print('...Done...\n')
+    print('\n...Done...\n')
     return
 
 def get_pack_name(name_string, pack_meta):
@@ -99,6 +91,7 @@ def validate_savepath(pack_name):
 def get_gif(pack_id, list_ids, pack_name):
     pack_name = validate_savepath(pack_name)
     os.makedirs('_animated/'+str(pack_name), exist_ok = True)
+    bar = Bar("", max=len(list_ids))
     for x in list_ids:
         # save_path = os.path.join(str(pack_name), str(x) + '.gif')
         save_path = os.path.join('_animated/', str(pack_name), str(x) + '.apng')
@@ -109,11 +102,13 @@ def get_gif(pack_id, list_ids, pack_name):
             for chunk in image.iter_content(chunk_size = 10240):
                 if chunk:
                     f.write(chunk)
+        bar.next()
 
 
 def get_png(pack_id, list_ids, pack_name):
     pack_name = validate_savepath(pack_name)
     os.makedirs('_static/'+str(pack_name), exist_ok = True)
+    bar = Bar("", max=len(list_ids))
     for x in list_ids:
         save_path = os.path.join('_static/', str(pack_name), str(x) + '.png')
         url = 'http://dl.stickershop.line.naver.jp/stickershop/v1/sticker/{}/iphone/sticker@2x.png'.format(x)
@@ -122,6 +117,7 @@ def get_png(pack_id, list_ids, pack_name):
             for chunk in image.iter_content(chunk_size = 10240):  # chunk_size is in bytes
                 if chunk:
                     f.write(chunk)
+        bar.next()
 
 
 def get_pack_meta(pack_id):

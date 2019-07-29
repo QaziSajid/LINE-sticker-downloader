@@ -1,8 +1,10 @@
 import sticker_dl as sd
 import os
 import subprocess as sp
+from progress.spinner import Spinner as Spinner
 
 FNULL = open(os.devnull, 'w')
+pformat = "{:^3d}/{:^3d}"
 
 def proper(s):
     p = ''.join(c for c in s if (c.isalnum() or c==' '))
@@ -30,14 +32,9 @@ if "_static" not in dirs:
 print("\nDownloading static stickers\n")
 i=1
 for pid in ids:
-    print(i, "/", len(ids), end=':\t')
+    print(pformat.format(i, len(ids)), end=':\t')
     i+=1
     sd.dwnl(pid, 0)
-
-#for d in dirs:
-#    if (d[0]!='.' and '.py' not in d and d!='_animated' and d!='_static' and d!='__pycache__' and '.txt' not in d and '.sh' not in d):
-#        sp.call(['rsync', '-r', '--remove-source-files', d, '_static'])
-
 
 print('\n'+'-'*25)
 dirs = os.listdir()
@@ -46,7 +43,7 @@ if "_animated" not in dirs:
 print("\nDownloading animated stickers\n")
 i=1
 for pid in ids:
-    print(i, "/", len(ids), end=':\t')
+    print(pformat.format(i, len(ids)), end=':\t')
     i+=1
     sd.dwnl(pid, 1)
 
@@ -62,30 +59,31 @@ if(c=='y' or c=='Y'):
     for d in dirs:
         if d[0]!='.':
             files = os.listdir('_animated/'+d)
-            print('Converting', d)
+            spinner = Spinner('Converting {} '.format(d))
             for f in files:
                 if "apng" in f:
                     sp.call(["apng2gif", '_animated/'+d+"/"+f, '_animated/'+d+"/"+f[:-4]+"gif"], stdout=FNULL)  
                     sp.call(["mogrify", "-loop", "0", '_animated/'+d+"/"+f[:-4]+"gif"])
                     sp.call(["rm", '_animated/'+d+"/"+f])
+                    spinner.next()
+            print()
             
 print("Do you want to split static packs at 30 limit? [y/n]")
 c = input()
 if(c=='y' or c=='Y'):
     dirs = os.listdir('_static')
     nf = 0
+    spinner = Spinner('Splitting')
     for d in dirs:
         if d[0]!='.':
             files = os.listdir('_static/'+d)
             nf = len(files)
             if (nf>30):
-                sd = proper(d)+"extra"
-                print("extras exist in ", d)
+                sd = proper(d)+"_extra"
                 sp.call(["mkdir", '_static/'+d+"/"+sd])
                 #print("directory made")
                 for i in range (30, nf):
                     f = files[i]
                     sp.call(["mv", '_static/'+d+'/'+f, '_static/'+d+'/'+sd])
-            #print ("moved")
-#print('Removing empty folders')
-#sp.call(['find', '.', '-type', 'd', '-empty', '-delete'])
+                    spinner.next()
+    print()
