@@ -1,7 +1,8 @@
-import webbrowser
 import sticker_dl as sd
 import os
 import subprocess as sp
+
+FNULL = open(os.devnull, 'w')
 
 def proper(s):
     p = ''.join(c for c in s if (c.isalnum() or c==' '))
@@ -64,7 +65,7 @@ if(c=='y' or c=='Y'):
             print('Converting', d)
             for f in files:
                 if "apng" in f:
-                    sp.call(["apng2gif", '_animated/'+d+"/"+f, '_animated/'+d+"/"+f[:-4]+"gif"])  
+                    sp.call(["apng2gif", '_animated/'+d+"/"+f, '_animated/'+d+"/"+f[:-4]+"gif"], stdout=FNULL)  
                     sp.call(["mogrify", "-loop", "0", '_animated/'+d+"/"+f[:-4]+"gif"])
                     sp.call(["rm", '_animated/'+d+"/"+f])
             
